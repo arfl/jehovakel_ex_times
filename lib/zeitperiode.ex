@@ -178,6 +178,36 @@ defmodule Shared.Zeitperiode do
     Shared.Dauer.subtrahiere(dauer1, dauer_differenz)
   end
 
+  @doc """
+  Zieht von einer Liste von Zeitperioden eine andere Liste von Zeitperioden ab,
+  so dass alle Überlappungen mit der zweiten Liste aus der ersten Liste entfernt
+  werden.
+  """
+  @spec differenz(list(Timex.Interval.t()) | Timex.Interval.t(), list(Timex.Interval.t())) ::
+          list(Timex.Interval.t())
+  def differenz(basis_intervalle, abzuziehende_intervalle)
+      when is_list(basis_intervalle) and is_list(abzuziehende_intervalle) do
+    basis_intervalle |> Enum.flat_map(&differenz(&1, abzuziehende_intervalle))
+  end
+
+  def differenz(%Timex.Interval{} = basis_intervall, []) do
+    [basis_intervall]
+  end
+
+  def differenz(%Timex.Interval{} = basis_intervall, [abzuziehendes_intervall]) do
+    basis_intervall |> differenz(abzuziehendes_intervall)
+  end
+
+  def differenz(%Timex.Interval{} = basis_intervall, [abzuziehendes_intervall | rest]) do
+    basis_intervall |> differenz(abzuziehendes_intervall) |> differenz(rest)
+  end
+
+  # Zieht von einer einzelnen Zeitperiode eine andere ab. Für tolle Beispiele siehe
+  # https://hexdocs.pm/timex/3.5.0/Timex.Interval.html#difference/2
+  defdelegate differenz(basis_intervall, abzuziehendes_intervall),
+    to: Timex.Interval,
+    as: :difference
+
   defmodule Timezone do
     @spec convert(
             DateTime.t(),

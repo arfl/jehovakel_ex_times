@@ -29,7 +29,9 @@ defmodule JehovakelExTimes.MixProject do
   defp deps do
     [
       {:timex, ">= 3.4.2"},
-      {:excoveralls, ">= 0.10.5", only: :test}
+      {:excoveralls, ">= 0.10.5", only: :test},
+      # Property based Testing for Elixir (based upon PropEr)
+      {:propcheck, "~> 1.2", only: [:test]}
     ]
   end
 

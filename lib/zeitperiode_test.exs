@@ -1,5 +1,7 @@
 defmodule Shared.ZeitperiodeTest do
   use ExUnit.Case, async: true
+  use PropCheck
+
   alias Shared.Zeitperiode, as: Periode
   import Support.TimeAssertionHelper
 
@@ -372,6 +374,111 @@ defmodule Shared.ZeitperiodeTest do
       assert dauer_der_ueberschneidung_test.("10:00-13:00", "11:00-12:00", 1.0)
       assert dauer_der_ueberschneidung_test.("09:00-13:00", "11:00-12:00", 1.0)
       assert dauer_der_ueberschneidung_test.("12:00-13:00", "10:00-14:00", 1.0)
+    end
+  end
+
+  describe "differenz einzelner Zeitperioden" do
+    # Restliche Testabdeckung ist in Timex zu finden ;-)
+    @datum ~D[2018-03-20]
+    test "zieht von erster Periode die Überlappung mit der zweiten Periode ab" do
+      neun_bis_elf = Periode.new(@datum, ~T[09:00:00], ~T[11:00:00])
+      zehn_bis_zwoelf = Periode.new(@datum, ~T[10:00:00], ~T[12:00:00])
+
+      neun_bis_zehn = Periode.new(@datum, ~T[09:00:00], ~T[10:00:00])
+
+      assert Periode.differenz(neun_bis_elf, zehn_bis_zwoelf) == [neun_bis_zehn]
+    end
+  end
+
+  describe "differenz von Listen von Zeitperioden" do
+    test "erzeugt neue Liste von Zeitperioden ohne die Überlappungen mit der zweiten Liste von Zeitperioden" do
+      datum = ~D[2019-04-22]
+
+      assert [Periode.new(datum, ~T[08:00:00], ~T[15:00:00])] ==
+               Periode.differenz(
+                 [Periode.new(datum, ~T[08:00:00], ~T[16:00:00])],
+                 [Periode.new(datum, ~T[15:00:00], ~T[16:00:00])]
+               )
+    end
+
+    test "Liste bleibt unverändert, wenn keine Überlappung mit der zweiten Liste vorhanden ist" do
+      erste_liste = [Periode.new(~D[2019-04-22], ~T[14:00:00], ~T[15:00:00])]
+
+      assert erste_liste ==
+               Periode.differenz(
+                 erste_liste,
+                 [
+                   Periode.new(~D[2019-04-24], ~T[17:00:00], ~T[18:00:00]),
+                   Periode.new(~D[2019-04-25], ~T[19:00:00], ~T[20:00:00])
+                 ]
+               )
+    end
+
+    test "Liste bleibt unverändert, wenn es nichts zu subtrahieren gibt" do
+      intervalle = [Periode.new(~D[2019-04-22], ~T[08:00:00], ~T[15:00:00])]
+      assert intervalle == Periode.differenz(intervalle, [])
+    end
+
+    # Minuend - Subtrahend = Differenz
+    # [----    --------- --   -----]   # Minuend
+    # [  ----    ---     -- ----   ]   # Subtrahend
+    # [--      --   ----        ---]   # Differenz
+    property "Differenz und Subtrahend dürfen sich nicht überschneiden" do
+      forall {minuend, subtrahend} <- minuend_und_subtrahend() do
+        differenz = Periode.differenz(minuend, subtrahend)
+
+        !ueberschneidung?(differenz, subtrahend)
+      end
+    end
+
+    def dauer(intervalle) when is_list(intervalle) do
+      intervalle |> Enum.reduce(Shared.Dauer.leer(), &Shared.Dauer.addiere(&1, &2))
+    end
+
+    # Helpers
+    def ueberschneidung?(perioden, andere_perioden) do
+      perioden
+      |> Enum.any?(fn periode ->
+        andere_perioden
+        |> Enum.any?(fn andere_periode -> Periode.ueberschneidung?(periode, andere_periode) end)
+      end)
+    end
+
+    # Generators
+    def minuend_und_subtrahend do
+      {non_empty(list(periode())), non_empty(list(periode()))}
+    end
+
+    def periode do
+      let {date_tuple, start, ende} <- {date(), time(), time()} do
+        Periode.new(Date.from_erl!(date_tuple), start, ende)
+      end
+    end
+
+    def time do
+      let {hour, minute, second} <- {integer(0, 23), integer(0, 59), integer(0, 59)} do
+        {:ok, time} = Time.new(hour, minute, second)
+        time
+      end
+    end
+
+    def date do
+      such_that(date_tuple <- date_tuple(), when: valid_date?(date_tuple))
+    end
+
+    %{year: max_year} = Date.utc_today()
+    @max_year max_year
+    def date_tuple do
+      let {year, month, day} <- {integer(1999, @max_year), integer(1, 12), integer(1, 31)} do
+        {year, month, day}
+      end
+    end
+
+    def valid_date?({year, month, day}) do
+      case Date.from_erl({year, month, day}) do
+        {:ok, _date} -> true
+        {:error, :invalid_date} -> false
+      end
     end
   end
 end
