@@ -127,10 +127,22 @@ defmodule Shared.Month do
     %Date{year: 2018, month: 3, day: 1}
 
   """
-  def first_day(%__MODULE__{year: year, month: month}) do
-    {:ok, day} = Date.new(year, month, 1)
+  def first_day(%__MODULE__{} = month) do
+    {first_day, _} = to_dates(month)
 
-    day
+    first_day
+  end
+
+  @doc ~S"""
+  ## Examples
+
+    iex> Month.last_day(@third_month_of_2018)
+    %Date{year: 2018, month: 3, day: 31}
+
+  """
+  def last_day(%__MODULE__{} = month) do
+    {_, last} = to_dates(month)
+    last
   end
 
   @doc ~S"""
