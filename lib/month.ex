@@ -51,7 +51,6 @@ defmodule Shared.Month do
     ** (Shared.Month.InvalidMonthIndex) Month must be an integer between 1 and 12, but was -7
 
   """
-
   def new!(year, month) do
     case new(year, month) do
       {:ok, month} ->
@@ -83,6 +82,16 @@ defmodule Shared.Month do
     new(year, month)
   end
 
+  @doc ~S"""
+  ## Examples
+
+    iex> Month.from_day!(%Date{year: 2018, month: 5, day: 17})
+    %Month{year: 2018, month: 5}
+
+    iex> Month.from_day!(%Date{year: 2018, month: 13, day: 17})
+    ** (Shared.Month.InvalidMonthIndex) Month must be an integer between 1 and 12, but was 13
+
+  """
   def from_day!(%Date{year: year, month: month}) do
     new!(year, month)
   end
@@ -102,6 +111,8 @@ defmodule Shared.Month do
     iex> Month.parse("2019-13")
     {:error, :invalid_month_index}
 
+    iex> Month.parse("foo")
+    {:error, :invalid_month_format}
   """
   def parse(<<year::bytes-size(4)>> <> "-" <> <<month::bytes-size(2)>>) do
     new(String.to_integer(year), String.to_integer(month))
@@ -110,6 +121,8 @@ defmodule Shared.Month do
   def parse(<<year::bytes-size(4)>> <> "-" <> <<month::bytes-size(1)>>) do
     new(String.to_integer(year), String.to_integer(month))
   end
+
+  def parse(_str), do: {:error, :invalid_month_format}
 
   @doc ~S"""
   ## Examples
