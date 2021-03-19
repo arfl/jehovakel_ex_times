@@ -7,8 +7,14 @@ defmodule Shared.Zeit do
   um. Es wird also angenommen, dass die übergebene Zeit in Deutschland statt
   fand.
 
-  iex> Shared.Zeit.mit_deutscher_zeitzone(~D[2018-04-22], ~T[15:00:00])
-  #DateTime<2018-04-22 15:00:00+02:00 CEST Europe/Berlin>
+  iex> Shared.Zeit.mit_deutscher_zeitzone(~D[2018-02-22], ~T[15:00:00])
+  #DateTime<2018-02-22 15:00:00+01:00 CET Europe/Berlin>
+
+  iex> Shared.Zeit.mit_deutscher_zeitzone(~N[2018-03-25 03:00:00])
+  #DateTime<2018-03-25 03:00:00+02:00 CEST Europe/Berlin>
+
+  iex> Shared.Zeit.mit_deutscher_zeitzone(~N[2018-10-28 02:30:00])
+  #DateTime<2018-10-28 02:30:00+01:00 CET Europe/Berlin>
   """
   def mit_deutscher_zeitzone(%Date{} = date, %Time{} = time) do
     {:ok, datetime} = NaiveDateTime.new(date, time)
@@ -19,8 +25,12 @@ defmodule Shared.Zeit do
 
   @spec mit_deutscher_zeitzone(NaiveDateTime.t()) :: DateTime.t()
   def mit_deutscher_zeitzone(%NaiveDateTime{} = datetime) do
-    datetime
-    |> Timex.to_datetime("Europe/Berlin")
+    datetime = datetime |> Timex.to_datetime("Europe/Berlin")
+
+    case datetime do
+      %Timex.AmbiguousDateTime{type: :ambiguous, after: winterzeit} -> winterzeit
+      _ -> datetime
+    end
   end
 
   @spec mit_deutscher_zeitzone(DateTime.t()) :: DateTime.t()

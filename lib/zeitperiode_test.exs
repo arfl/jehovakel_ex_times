@@ -128,14 +128,14 @@ defmodule Shared.ZeitperiodeTest do
 
   describe "kann mit Zeiten mit Zeitzonen umgehen" do
     test "wenn es eine Zeitumstellung auf Sommerzeit gibt" do
-      {:ok, start, _offset} = DateTime.from_iso8601("2018-03-24T22:00:00+01:00")
-      {:ok, ende, _offset} = DateTime.from_iso8601("2018-03-25T04:00:00+02:00")
+      {:ok, start, _offset} = DateTime.from_iso8601("2018-03-23T22:00:00+01:00")
+      {:ok, ende, _offset} = DateTime.from_iso8601("2018-03-24T04:00:00+02:00")
 
       periode = Periode.new(start, ende)
 
       assert Periode.dauer_in_stunden(periode) == 5.0
-      assert to_string(periode.from) == "2018-03-24 22:00:00"
-      assert to_string(periode.until) == "2018-03-25 03:00:00"
+      assert to_string(periode.from) == "2018-03-23 22:00:00"
+      assert to_string(periode.until) == "2018-03-24 03:00:00"
     end
 
     test "wenn es eine Zeitumstellung auf Winterzeit gibt" do

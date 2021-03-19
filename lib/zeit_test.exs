@@ -8,6 +8,15 @@ defmodule Shared.ZeitTest do
   import Shared.Zeit.Sigil
   doctest Shared.Zeit.Sigil
 
+  describe "mit_deutscher_zeitzone/1" do
+    test "Zeitumstellung von Winterzeit auf Sommerzeit" do
+      zeit_in_luecke = ~N[2018-03-25 02:00:00]
+
+      assert %Timex.AmbiguousDateTime{type: :gap} =
+               Shared.Zeit.mit_deutscher_zeitzone(zeit_in_luecke)
+    end
+  end
+
   describe "parse/1" do
     test "parse Date Time mit Zeitzone" do
       assert Zeit.parse("2019-04-18T10:00:00+02:00")
