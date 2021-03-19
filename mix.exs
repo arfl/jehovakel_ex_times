@@ -4,7 +4,7 @@ defmodule JehovakelExTimes.MixProject do
   def project do
     [
       app: :jehovakel_ex_times,
-      version: "1.0.2",
+      version: "1.0.3",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -28,7 +28,7 @@ defmodule JehovakelExTimes.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:timex, ">= 3.4.2"},
+      {:timex, "~> 3.7"},
       {:jason, "~> 1.0", optional: true},
       {:excoveralls, ">= 0.10.5", only: :test},
       # Property based Testing for Elixir (based upon PropEr)
