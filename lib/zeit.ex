@@ -54,8 +54,17 @@ defmodule Shared.Zeit do
 
   @spec parse(binary) :: DateTime.t() | NaiveDateTime.t()
   def parse(to_parse) when is_binary(to_parse) do
-    {:ok, date_time} = Timex.parse(to_parse, "{ISO:Extended}")
-    date_time
+    case Timex.parse(to_parse, "{ISO:Extended}") do
+      {:ok, %DateTime{} = date_time} ->
+        if date_time.utc_offset != 0 do
+          DateTime.shift_zone!(date_time, "Europe/Berlin")
+        else
+          date_time
+        end
+
+      {:ok, %NaiveDateTime{} = naive_date_time} ->
+        naive_date_time
+    end
   end
 
   @spec jetzt :: DateTime.t()
