@@ -52,3 +52,17 @@ defimpl Shared.Zeitvergleich, for: Time do
     self |> frueher_als?(other) || self |> zeitgleich?(other)
   end
 end
+
+defimpl Shared.Zeitvergleich, for: Date do
+  def frueher_als?(%@for{} = self, %@for{} = other) do
+    @for.compare(self, other) == :lt
+  end
+
+  def zeitgleich?(%@for{} = self, %@for{} = other) do
+    @for.compare(self, other) == :eq
+  end
+
+  def frueher_als_oder_zeitgleich?(%@for{} = self, %@for{} = other) do
+    self |> frueher_als?(other) || self |> zeitgleich?(other)
+  end
+end

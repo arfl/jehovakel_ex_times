@@ -1,6 +1,5 @@
 defmodule Shared.ZeitvergleichTest do
   use ExUnit.Case, async: true
-  import Shared.Month, only: [sigil_m: 2]
   import Shared.Zeit.Sigil, only: [sigil_G: 2]
 
   alias Shared.Zeitvergleich
@@ -34,6 +33,12 @@ defmodule Shared.ZeitvergleichTest do
       refute ~T[12:00:00] |> Zeitvergleich.frueher_als?(~T[11:01:00])
       refute ~T[12:00:00] |> Zeitvergleich.frueher_als?(~T[12:00:00])
     end
+
+    test "Date" do
+      assert ~D[2021-06-18] |> Zeitvergleich.frueher_als?(~D[2021-06-19])
+      refute ~D[2021-06-18] |> Zeitvergleich.frueher_als?(~D[2021-06-18])
+      refute ~D[2021-06-18] |> Zeitvergleich.frueher_als?(~D[2021-06-17])
+    end
   end
 
   describe "zeitgleich?/2" do
@@ -65,6 +70,12 @@ defmodule Shared.ZeitvergleichTest do
       refute ~T[12:00:00] |> Zeitvergleich.zeitgleich?(~T[12:01:00])
       refute ~T[12:00:00] |> Zeitvergleich.zeitgleich?(~T[11:01:00])
       assert ~T[12:00:00] |> Zeitvergleich.zeitgleich?(~T[12:00:00])
+    end
+
+    test "Date" do
+      refute ~D[2021-06-18] |> Zeitvergleich.zeitgleich?(~D[2021-06-19])
+      refute ~D[2021-06-18] |> Zeitvergleich.zeitgleich?(~D[2021-06-17])
+      assert ~D[2021-06-18] |> Zeitvergleich.zeitgleich?(~D[2021-06-18])
     end
   end
 
@@ -106,6 +117,12 @@ defmodule Shared.ZeitvergleichTest do
       assert ~T[12:00:00] |> Zeitvergleich.frueher_als_oder_zeitgleich?(~T[12:01:00])
       refute ~T[12:00:00] |> Zeitvergleich.frueher_als_oder_zeitgleich?(~T[11:01:00])
       assert ~T[12:00:00] |> Zeitvergleich.frueher_als_oder_zeitgleich?(~T[12:00:00])
+    end
+
+    test "Date" do
+      assert ~D[2021-06-18] |> Zeitvergleich.frueher_als_oder_zeitgleich?(~D[2021-06-19])
+      refute ~D[2021-06-18] |> Zeitvergleich.frueher_als_oder_zeitgleich?(~D[2021-06-17])
+      assert ~D[2021-06-18] |> Zeitvergleich.frueher_als_oder_zeitgleich?(~D[2021-06-18])
     end
   end
 end
